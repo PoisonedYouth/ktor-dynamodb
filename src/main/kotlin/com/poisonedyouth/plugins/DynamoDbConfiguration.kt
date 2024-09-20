@@ -1,7 +1,7 @@
 package com.poisonedyouth.plugins
 
 import com.poisonedyouth.product.ProductEntity
-import io.andrewohara.dynamokt.DataClassTableSchema
+import dev.andrewohara.dynamokt.DataClassTableSchema
 import io.ktor.server.application.Application
 import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory

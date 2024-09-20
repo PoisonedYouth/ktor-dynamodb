@@ -1,10 +1,8 @@
 package com.poisonedyouth.product
 
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean
-import io.andrewohara.dynamokt.DynamoKtPartitionKey
+import dev.andrewohara.dynamokt.DynamoKtPartitionKey
 import kotlinx.serialization.Serializable
 
-@DynamoDbBean
 data class ProductEntity(
     @DynamoKtPartitionKey
     val productId: String,
@@ -21,7 +19,7 @@ data class Product(
 
 @JvmInline
 @Serializable
-value class ProductId(val value: String){
+value class ProductId(val value: String) {
     init {
         require(value.isNotBlank()) { "Product Id cannot be blank" }
         require(value.length == 16) { "Product Id must be 16 characters" }
@@ -30,7 +28,7 @@ value class ProductId(val value: String){
 
 @JvmInline
 @Serializable
-value class ProductName(val value: String){
+value class ProductName(val value: String) {
     init {
         require(value.isNotBlank()) { "Product Name cannot be blank" }
         require(value.length <= 32) { "Product Name cannot be longer than 32 characters" }

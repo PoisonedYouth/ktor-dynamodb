@@ -1,6 +1,6 @@
 package com.poisonedyouth.product
 
-import io.andrewohara.dynamokt.DataClassTableSchema
+import dev.andrewohara.dynamokt.DataClassTableSchema
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient

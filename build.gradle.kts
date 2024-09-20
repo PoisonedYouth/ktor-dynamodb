@@ -19,7 +19,6 @@ application {
 
 repositories {
     mavenCentral()
-    maven { setUrl("https://jitpack.io" )}
 }
 
 dependencies {
@@ -28,7 +27,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("software.amazon.awssdk:dynamodb-enhanced:2.28.1")
     implementation("software.amazon.awssdk:dynamodb:2.28.1")
-    implementation("com.github.oharaandrew314:dynamodb-kotlin-module:0.8.1")
+    implementation("dev.andrewohara:dynamokt:1.0.0")
     implementation("io.ktor:ktor-server-content-negotiation")
     implementation("io.ktor:ktor-serialization-kotlinx-json")
 
