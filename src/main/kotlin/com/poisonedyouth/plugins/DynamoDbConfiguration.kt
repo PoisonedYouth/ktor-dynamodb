@@ -1,13 +1,16 @@
 package com.poisonedyouth.plugins
 
+import com.poisonedyouth.order.OrderEntity
 import com.poisonedyouth.product.ProductEntity
 import dev.andrewohara.dynamokt.DataClassTableSchema
 import io.ktor.server.application.Application
 import kotlinx.coroutines.future.await
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import java.net.URI
+import kotlin.reflect.KClass
 
 fun Application.createDynamoDbClient(): DynamoDbAsyncClient {
     val url = environment.config.property("ktor.database.dynamodbUrl").getString()
@@ -25,16 +28,21 @@ fun createEnhancedDynamoDbClient(dynamoDbClient: DynamoDbAsyncClient): DynamoDbE
 }
 
 suspend fun createNecessaryTables(dynamoDbClient: DynamoDbAsyncClient, dynamoDbEnhancedClient: DynamoDbEnhancedAsyncClient) {
-    val logger = LoggerFactory.getLogger(Application::class.java)
-
     val existingTables = dynamoDbClient.listTables().await().tableNames()
 
-    val productEntity = ProductEntity::class
-    val tableSchema = DataClassTableSchema(productEntity)
-    if (existingTables.contains(productEntity.simpleName)) {
-        logger.info("Table '${productEntity.simpleName}' already exists.")
+    listOf(ProductEntity::class, OrderEntity::class).forEach {
+        createTableIfNotExists(existingTables, it, dynamoDbEnhancedClient)
+    }
+}
+
+private val logger: Logger = LoggerFactory.getLogger(Application::class.java)
+
+private suspend fun <T : Any> createTableIfNotExists(existingTables: List<String>, item: KClass<T>, dynamoDbEnhancedClient: DynamoDbEnhancedAsyncClient) {
+    val tableSchema = DataClassTableSchema(item)
+    if (existingTables.contains(item.simpleName)) {
+        logger.info("Table '${item.simpleName}' already exists.")
     } else {
-        dynamoDbEnhancedClient.table(productEntity.simpleName, tableSchema).createTable().await()
-        logger.info("Table '${productEntity.simpleName}' created successfully.")
+        dynamoDbEnhancedClient.table(item.simpleName, tableSchema).createTable().await()
+        logger.info("Table '${item.simpleName}' created successfully.")
     }
 }

@@ -1,5 +1,8 @@
 package com.poisonedyouth
 
+import com.poisonedyouth.order.OrderRepository
+import com.poisonedyouth.order.OrderService
+import com.poisonedyouth.order.configureRouting
 import com.poisonedyouth.plugins.*
 import com.poisonedyouth.product.ProductRepository
 import com.poisonedyouth.product.ProductService
@@ -20,4 +23,7 @@ fun Application.module() = runBlocking {
     val productRepository = ProductRepository(dynamoDbEnhancedClient)
     val productService = ProductService(productRepository)
     configureRouting(productService)
+    val orderRepository = OrderRepository(dynamoDbEnhancedClient)
+    val orderService = OrderService(orderRepository)
+    configureRouting(orderService)
 }
