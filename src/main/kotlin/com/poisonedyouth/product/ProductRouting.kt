@@ -22,7 +22,7 @@ fun Application.configureRouting(productService: ProductService) {
         get("/product/{id}") {
             val id = call.parameters["id"]
                 ?: return@get call.respond(HttpStatusCode.BadRequest, "Missing 'id' parameter.")
-            val product = productService.getProduct(id)
+            val product = productService.getProduct(ProductId(id))
             if (product == null) {
                 call.respond(HttpStatusCode.NotFound, "Product not found.")
             } else {
@@ -35,7 +35,7 @@ fun Application.configureRouting(productService: ProductService) {
         delete("/product/{id}") {
             val id = call.parameters["id"]
                 ?: return@delete call.respond(HttpStatusCode.BadRequest, "Missing 'id' parameter.")
-            productService.deleteProduct(id)
+            productService.deleteProduct(ProductId(id))
             call.respond(HttpStatusCode.Accepted)
         }
 

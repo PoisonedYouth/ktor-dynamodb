@@ -35,7 +35,7 @@ class ProductRepository(
         table.deleteItem(Key.builder().partitionValue(productId).build()).await()
     }
 
-    suspend fun updateProduct(product: Product) {
+    suspend fun update(product: Product) {
         table.updateItem(product.toProductEntity()).await()
     }
 }

@@ -15,15 +15,15 @@ class ProductService(
     suspend fun updateProduct(product: Product) {
         productRepository.findById(product.productId.value)
             ?: error("Product with id ${product.productId} not found.")
-        productRepository.updateProduct(product)
+        productRepository.update(product)
     }
 
-    suspend fun getProduct(productId: String): Product? {
-        return productRepository.findById(productId)
+    suspend fun getProduct(productId: ProductId): Product? {
+        return productRepository.findById(productId = productId.value)
     }
 
-    suspend fun deleteProduct(productId: String) {
-        productRepository.deleteById(productId)
+    suspend fun deleteProduct(productId: ProductId) {
+        productRepository.deleteById(productId.value)
     }
 
     suspend fun getAllProducts(): List<Product> {
