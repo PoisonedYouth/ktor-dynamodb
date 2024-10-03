@@ -22,7 +22,7 @@ data class Product(
 value class ProductId(val value: String) {
     init {
         require(value.isNotBlank()) { "Product Id cannot be blank" }
-        require(value.length == 16) { "Product Id must be 16 characters" }
+        //require(value.length == 16) { "Product Id must be 16 characters" }
     }
 }
 

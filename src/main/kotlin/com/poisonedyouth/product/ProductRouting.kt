@@ -29,7 +29,7 @@ fun Application.configureRouting(productService: ProductService) {
                 call.respond(product)
             }
         }
-        get("/product") {
+        get("/product/all") {
             call.respond(HttpStatusCode.OK, productService.getAllProducts())
         }
         delete("/product/{id}") {
