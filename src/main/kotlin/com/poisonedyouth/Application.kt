@@ -7,6 +7,9 @@ import com.poisonedyouth.plugins.*
 import com.poisonedyouth.product.ProductRepository
 import com.poisonedyouth.product.ProductService
 import com.poisonedyouth.product.configureRouting
+import com.poisonedyouth.user.UserRepository
+import com.poisonedyouth.user.UserService
+import com.poisonedyouth.user.configureRouting
 import io.ktor.server.application.*
 import kotlinx.coroutines.runBlocking
 
@@ -26,4 +29,7 @@ fun Application.module() = runBlocking {
     val orderRepository = OrderRepository(dynamoDbEnhancedClient)
     val orderService = OrderService(orderRepository)
     configureRouting(orderService)
+    val userRepository = UserRepository(dynamoDbEnhancedClient)
+    val userService = UserService(userRepository)
+    configureRouting(userService)
 }

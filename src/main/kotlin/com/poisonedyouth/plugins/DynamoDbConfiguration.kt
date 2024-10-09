@@ -2,6 +2,7 @@ package com.poisonedyouth.plugins
 
 import com.poisonedyouth.order.OrderEntity
 import com.poisonedyouth.product.ProductEntity
+import com.poisonedyouth.user.UserEntity
 import dev.andrewohara.dynamokt.DataClassTableSchema
 import io.ktor.server.application.Application
 import kotlinx.coroutines.future.await
@@ -30,7 +31,7 @@ fun createEnhancedDynamoDbClient(dynamoDbClient: DynamoDbAsyncClient): DynamoDbE
 suspend fun createNecessaryTables(dynamoDbClient: DynamoDbAsyncClient, dynamoDbEnhancedClient: DynamoDbEnhancedAsyncClient) {
     val existingTables = dynamoDbClient.listTables().await().tableNames()
 
-    listOf(ProductEntity::class, OrderEntity::class).forEach {
+    listOf(ProductEntity::class, OrderEntity::class, UserEntity::class).forEach {
         createTableIfNotExists(existingTables, it, dynamoDbEnhancedClient)
     }
 }
