@@ -27,7 +27,7 @@ class OrderRepository(
         table.putItem(order.toOrderEntity()).await()
     }
 
-    suspend fun findAllByProductIdInRange(productId: String, from: Instant, to: Instant): List<Order>{
+    suspend fun findAllByProductIdInRange(productId: String, from: Instant, to: Instant): List<Order> {
         return buildList {
             table.index(PRODUCT_ID_ORDER_DATE_INDEX).query(
                 QueryConditional.sortBetween(
@@ -38,15 +38,13 @@ class OrderRepository(
         }
     }
 
-    suspend fun findAllByPaymentTypeUntil(paymentType: String, until: Instant): List<Order>{
+    suspend fun findAllByPaymentTypeUntil(paymentType: String, until: Instant): List<Order> {
         return buildList {
             table.index(PAYMENT_TYPE_ORDER_DATE_INDEX).query(
                 QueryConditional.sortLessThanOrEqualTo(
                     Key.builder().partitionValue(paymentType).sortValue(until.toEpochMilli()).build(),
                 )
-            ).subscribe { page ->
-                page.items().stream().forEach { item -> add(item.toOrder()) }
-            }.await()
+            ).asFlow().collect { it.items().stream().forEach { item -> add(item.toOrder()) } }
         }
     }
 
@@ -60,13 +58,13 @@ class OrderRepository(
         return buildList {
             table.query(
                 QueryConditional.sortBeginsWith(
-                    Key.builder().partitionValue(customerId).sortValue(localDate.toEpochSecond(
-                        LocalTime.MIN, ZoneOffset.UTC
-                    )).build(),
+                    Key.builder().partitionValue(customerId).sortValue(
+                        localDate.toEpochSecond(
+                            LocalTime.MIN, ZoneOffset.UTC
+                        )
+                    ).build(),
                 )
-            ).subscribe { page ->
-                page.items().stream().forEach { item -> add(item.toOrder()) }
-            }.await()
+            ).asFlow().collect { it.items().stream().forEach { item -> add(item.toOrder()) } }
         }
     }
 
@@ -77,9 +75,7 @@ class OrderRepository(
                     Key.builder().partitionValue(customerId).sortValue(from).build(),
                     Key.builder().partitionValue(customerId).sortValue(to).build()
                 )
-            ).subscribe { page ->
-                page.items().stream().forEach { item -> add(item.toOrder()) }
-            }.await()
+            ).asFlow().collect { it.items().stream().forEach { item -> add(item.toOrder()) } }
         }
 
     }
@@ -90,18 +86,14 @@ class OrderRepository(
                 QueryConditional.sortLessThan(
                     Key.builder().partitionValue(customerId).sortValue(orderDate).build(),
                 )
-            ).subscribe() { page ->
-                page.items().stream().forEach { item -> add(item.toOrder()) }
-            }.await()
+            ).asFlow().collect { it.items().stream().forEach { item -> add(item.toOrder()) } }
         }
 
     }
 
     suspend fun findAll(): List<Order> {
         return buildList {
-            table.scan().subscribe { page ->
-                page.items().stream().forEach { item -> add(item.toOrder()) }
-            }.await()
+            table.scan().asFlow().collect { it.items().stream().forEach { item -> add(item.toOrder()) } }
         }
     }
 

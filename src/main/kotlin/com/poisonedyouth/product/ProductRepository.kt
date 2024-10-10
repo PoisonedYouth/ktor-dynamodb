@@ -1,5 +1,6 @@
 package com.poisonedyouth.product
 
+import com.poisonedyouth.order.toOrder
 import dev.andrewohara.dynamokt.DataClassTableSchema
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.future.await

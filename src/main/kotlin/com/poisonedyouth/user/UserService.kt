@@ -5,7 +5,7 @@ class UserService(
 ) {
 
     suspend fun addUser(user: User) {
-        val existingUser = userRepository.findById(user.userId.value)
+        val existingUser = userRepository.findById(user.userId)
         if (existingUser != null) {
             error("User with userId '${user.userId}' already exists.")
         }
@@ -14,6 +14,12 @@ class UserService(
 
     suspend fun getAllUsers(): List<User> {
         return userRepository.findAll()
+    }
+
+    suspend fun getAllBatch(): List<User> {
+        return userRepository.batchGet(
+            (11111..11131).map { UserId(it) }
+        )
     }
 
 }
