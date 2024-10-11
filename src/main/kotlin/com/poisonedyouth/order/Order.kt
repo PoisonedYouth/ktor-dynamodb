@@ -1,9 +1,9 @@
-@file:UseSerializers(InstantSerializer::class)
+@file:UseSerializers(InstantToMillisSerializer::class)
 
 package com.poisonedyouth.order
 
 import com.poisonedyouth.product.ProductId
-import com.poisonedyouth.util.InstantSerializer
+import com.poisonedyouth.util.InstantToMillisSerializer
 import dev.andrewohara.dynamokt.DynamoKtPartitionKey
 import dev.andrewohara.dynamokt.DynamoKtSecondaryPartitionKey
 import dev.andrewohara.dynamokt.DynamoKtSecondarySortKey
@@ -11,8 +11,6 @@ import dev.andrewohara.dynamokt.DynamoKtSortKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
 
 data class OrderEntity(
     @DynamoKtPartitionKey

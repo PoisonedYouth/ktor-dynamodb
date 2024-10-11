@@ -1,24 +1,45 @@
+@file:UseSerializers(LocalDateTimeSerializer::class)
+
 package com.poisonedyouth.user
 
+import com.poisonedyouth.util.LocalDateTimeSerializer
 import dev.andrewohara.dynamokt.DynamoKtConverted
 import dev.andrewohara.dynamokt.DynamoKtPartitionKey
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
+import java.time.LocalDateTime
 
 data class UserEntity(
     @DynamoKtPartitionKey
     val userId: Int,
     val name: String,
     val email: String,
-    @DynamoKtConverted(AddressConverter::class)
-    val address: AddressEntity
+    @DynamoKtConverted(JobStatusConverter::class)
+    val jobStatus: JobStatus,
+    val address: AddressEntity,
+    @DynamoKtConverted(LocalDateTimeConverter::class)
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 )
+
+enum class JobStatus(val id: Int) {
+    EMPLOYED(1),
+    UNEMPLOYED(2);
+
+    companion object {
+        fun fromId(id: Int): JobStatus {
+            return entries.firstOrNull { it.id == id } ?: error("Unknown job status id: $id")
+        }
+    }
+}
 
 @Serializable
 data class User(
     val userId: UserId,
     val name: Name,
     val email: Email,
+    val jobStatus: JobStatus,
     val address: Address,
+    val createdAt: LocalDateTime,
 )
 
 @JvmInline
@@ -63,12 +84,16 @@ fun UserEntity.toUser() = User(
     userId = UserId(userId),
     name = Name(name),
     email = Email(email),
-    address = address.toAddress()
+    jobStatus = jobStatus,
+    address = address.toAddress(),
+    createdAt = createdAt,
 )
 
 fun User.toUserEntity() = UserEntity(
     userId = userId.value,
     name = name.value,
     email = email.value,
-    address = address.toAddressEntity()
+    jobStatus = jobStatus,
+    address = address.toAddressEntity(),
+    createdAt = createdAt,
 )

@@ -7,7 +7,9 @@ import kotlinx.coroutines.reactive.asFlow
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetItemEnhancedRequest
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch
 
 class UserRepository(
     private val dynamoDbEnhancedAsyncClient: DynamoDbEnhancedAsyncClient,
@@ -28,7 +30,7 @@ class UserRepository(
 
     suspend fun findAll(): List<User> {
         return buildList {
-            table.scan().asFlow().collect{ it.items().stream().forEach { item -> add(item.toUser()) } }
+            table.scan().asFlow().collect { it.items().stream().forEach { item -> add(item.toUser()) } }
         }
     }
 
@@ -40,10 +42,42 @@ class UserRepository(
             readBatch.addGetItem(Key.builder().partitionValue(userId.value).build())
         }
         return buildList {
-            dynamoDbEnhancedAsyncClient.batchGetItem {
+            dynamoDbEnhancedAsyncClient.batchGetItem(
                 BatchGetItemEnhancedRequest.builder().readBatches(readBatch.build()).build()
-            }.asFlow().collect{ it.resultsForTable(table).stream().forEach { item -> add(item.toUser()) } }
+            ).asFlow().collect { it.resultsForTable(table).stream().forEach { item -> add(item.toUser()) } }
         }
 
     }
+
+    suspend fun batchWrite(userList: List<User>) {
+        var writeBatch = WriteBatch.builder(
+            UserEntity::class.java
+        ).mappedTableResource(table)
+        userList.forEach { user ->
+            writeBatch.addPutItem(user.toUserEntity())
+        }
+
+        var unprocessedItems = dynamoDbEnhancedAsyncClient.batchWriteItem(
+            BatchWriteItemEnhancedRequest.builder().writeBatches(writeBatch.build()).build()
+        ).await().unprocessedPutItemsForTable(table)
+
+        val maxRetryCount = 3
+        var retry = 1
+        while (unprocessedItems.isNotEmpty() && retry++ <= maxRetryCount) {
+            writeBatch = WriteBatch.builder(
+                UserEntity::class.java
+            ).mappedTableResource(table)
+            unprocessedItems.forEach { user ->
+                writeBatch.addPutItem(user)
+            }
+            unprocessedItems = dynamoDbEnhancedAsyncClient.batchWriteItem(
+                BatchWriteItemEnhancedRequest.builder().writeBatches(writeBatch.build()).build()
+            ).await().unprocessedPutItemsForTable(table)
+        }
+        if(unprocessedItems.isNotEmpty()) {
+            error("Not able to write items $unprocessedItems to database.")
+        }
+
+    }
+
 }
