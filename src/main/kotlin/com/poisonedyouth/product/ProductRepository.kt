@@ -7,7 +7,6 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.reactive.asFlow
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient
 import software.amazon.awssdk.enhanced.dynamodb.Key
-import java.util.stream.Collectors
 
 class ProductRepository(
     dynamoDbEnhancedAsyncClient: DynamoDbEnhancedAsyncClient,

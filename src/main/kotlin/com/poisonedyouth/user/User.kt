@@ -19,11 +19,13 @@ data class UserEntity(
     val address: AddressEntity,
     @DynamoKtConverted(LocalDateTimeConverter::class)
     val createdAt: LocalDateTime = LocalDateTime.now(),
+    val expirationTime: Long? = null,
 )
 
 enum class JobStatus(val id: Int) {
     EMPLOYED(1),
-    UNEMPLOYED(2);
+    UNEMPLOYED(2),
+    ON_LEAVE(3);
 
     companion object {
         fun fromId(id: Int): JobStatus {

@@ -5,11 +5,16 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.reactive.asFlow
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient
+import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetItemEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 class UserRepository(
     private val dynamoDbEnhancedAsyncClient: DynamoDbEnhancedAsyncClient,
@@ -26,6 +31,47 @@ class UserRepository(
         return table.getItem(
             Key.builder().partitionValue(userId.value).build()
         ).await()?.toUser()
+    }
+
+    suspend fun findByJobStatus(jobStatus: JobStatus): List<User> {
+        return buildList {
+            table.scan(
+                ScanEnhancedRequest.builder().filterExpression(
+                    Expression.builder()
+                        .expression("jobStatus = :jobStatus")
+                        .putExpressionValue(":jobStatus", AttributeValue.builder().n(jobStatus.id.toString()).build())
+                        .build()
+                ).build()
+            ).asFlow().collect { it.items().stream().forEach { item -> add(item.toUser()) } }
+        }
+    }
+
+    suspend fun findByNameStartingWith(namePrefix: String): List<User> {
+        return buildList {
+            table.scan(
+                ScanEnhancedRequest.builder().filterExpression(
+                    Expression.builder()
+                        .expression("begins_with(#nameAttr, :namePrefix)")
+                        .putExpressionValue(":namePrefix", AttributeValue.builder().s(namePrefix).build())
+                        .putExpressionName("#nameAttr", "name") // This is necessary because 'name' is a reserved word in DynamoDB
+                        .build()
+                ).build()
+            ).asFlow().collect { it.items().stream().forEach { item -> add(item.toUser()) } }
+        }
+    }
+
+    suspend fun findAllCreatedInRange(start: LocalDateTime, end: LocalDateTime): List<User> {
+        return buildList {
+            table.scan(
+                ScanEnhancedRequest.builder().filterExpression(
+                    Expression.builder()
+                        .expression("createdAt BETWEEN :start AND :end")
+                        .putExpressionValue(":start", AttributeValue.builder().s(start.toInstant(ZoneOffset.UTC).toString()).build())
+                        .putExpressionValue(":end", AttributeValue.builder().s(end.toInstant(ZoneOffset.UTC).toString()).build())
+                        .build()
+                ).build()
+            ).asFlow().collect { it.items().stream().forEach { item -> add(item.toUser()) } }
+        }
     }
 
     suspend fun findAll(): List<User> {
@@ -74,7 +120,7 @@ class UserRepository(
                 BatchWriteItemEnhancedRequest.builder().writeBatches(writeBatch.build()).build()
             ).await().unprocessedPutItemsForTable(table)
         }
-        if(unprocessedItems.isNotEmpty()) {
+        if (unprocessedItems.isNotEmpty()) {
             error("Not able to write items $unprocessedItems to database.")
         }
 
