@@ -5,6 +5,7 @@ package com.poisonedyouth.user
 import com.poisonedyouth.util.LocalDateTimeSerializer
 import dev.andrewohara.dynamokt.DynamoKtConverted
 import dev.andrewohara.dynamokt.DynamoKtPartitionKey
+import dev.andrewohara.dynamokt.DynamoKtSecondaryPartitionKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import java.time.LocalDateTime
@@ -19,7 +20,8 @@ data class UserEntity(
     val address: AddressEntity,
     @DynamoKtConverted(LocalDateTimeConverter::class)
     val createdAt: LocalDateTime = LocalDateTime.now(),
-    val expirationTime: Long? = null,
+    @DynamoKtSecondaryPartitionKey(indexNames = [USER_EXPIRATION_TIME_INDEX])
+    val expirationTime: Long? = 1200,
 )
 
 enum class JobStatus(val id: Int) {

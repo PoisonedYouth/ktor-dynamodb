@@ -9,12 +9,18 @@ import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetItemEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.QueryRequest
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+
+const val USER_EXPIRATION_TIME_INDEX = "User-ExpirationTime-index"
 
 class UserRepository(
     private val dynamoDbEnhancedAsyncClient: DynamoDbEnhancedAsyncClient,
@@ -126,4 +132,19 @@ class UserRepository(
 
     }
 
+    suspend fun findAllExpired(): List<User> {
+        val currentTimestamp = Instant.now().epochSecond
+
+        return buildList {
+            table.index(USER_EXPIRATION_TIME_INDEX)
+                .scan(ScanEnhancedRequest.builder().filterExpression(
+                    Expression.builder()
+                        .expression("expirationTime < :currentTime")
+                        .putExpressionValue(":currentTime", AttributeValue.builder().n(currentTimestamp.toString()).build())
+                        .build()
+                ).build())
+                .asFlow().collect { it.items().stream().forEach { item -> add(item.toUser()) } }
+        }
+
+    }
 }

@@ -46,5 +46,9 @@ fun Application.configureRouting(userService: UserService) {
                 end = LocalDateTime.parse(end)
             ))
         }
+
+        get("/user/expired") {
+            call.respond(HttpStatusCode.OK, userService.getAllExpired())
+        }
     }
 }

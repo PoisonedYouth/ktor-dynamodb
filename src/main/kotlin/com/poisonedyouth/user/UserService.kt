@@ -49,4 +49,7 @@ class UserService(
         return userRepository.findAllCreatedInRange(start, end)
     }
 
+    suspend fun getAllExpired(): List<User> {
+        return userRepository.findAllExpired()
+    }
 }
