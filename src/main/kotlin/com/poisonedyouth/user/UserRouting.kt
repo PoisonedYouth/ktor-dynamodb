@@ -7,7 +7,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import java.time.Instant
 import java.time.LocalDateTime
 
 fun Application.configureRouting(userService: UserService) {

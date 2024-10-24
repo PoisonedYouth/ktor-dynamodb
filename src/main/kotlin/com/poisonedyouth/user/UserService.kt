@@ -30,6 +30,7 @@ class UserService(
 
     suspend fun getAllBatch(): List<User> {
         return userRepository.batchGet(
+            // Just as a dummy implementation
             (11111..11131).map { UserId(it) }
         )
     }

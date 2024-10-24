@@ -9,13 +9,10 @@ import software.amazon.awssdk.enhanced.dynamodb.Expression
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetItemEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import software.amazon.awssdk.services.dynamodb.model.QueryRequest
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
